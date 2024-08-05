@@ -1,0 +1,107 @@
+- hosts: localhost
+  tasks:
+    - name: Install Stow
+      homebrew: name=stow
+
+    - name: set default git config user name
+      git_config:
+        name: user.name
+        scope: global
+        value: 'Stefan Trost'
+
+    - name: set default git config user email
+      git_config:
+        name: user.email
+        scope: global
+        value: 'stefan@techscene.de'
+
+    - name: Check if ohmyzsh is installed
+      stat:
+        path: "~/.oh-my-zsh/"
+      register: ohmyzsh_dir
+
+    - name: install oh my zsh
+      shell: 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+      when: not ohmyzsh_dir.stat.exists
+
+    - name: install ohmyzsh Spaceship Theme
+      homebrew: name=spaceship
+
+    - name: Symlink Spaceship Theme
+      shell: ln -sF $(brew --prefix)/opt/spaceship/spaceship.zsh-theme ~/.oh-my-zsh/custom/themes/spaceship.zsh-theme
+
+    - name: Install ZSH Autosuggestions
+      homebrew: name=zsh-autosuggestions
+
+    # - name: Symlink ZSH Autosuggestions
+    #   shell: ln -sF $(brew --prefix)/opt/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+
+    - name: Check if dotfiles exist
+      stat:
+        path: ~/.dotfiles
+      register: dots
+
+    - name: Clone dotfiles
+      git:
+        repo: https://github.com/stefantrost/.dotfiles.git
+        dest: ~/.dotfiles
+      when: not dots.stat.exists
+
+    - name: Install fzf
+      homebrew: name=fzf
+
+    - name: Install/clone TPM
+      git:
+        repo: https://github.com/tmux-plugins/tpm 
+        dest: ~/.tmux/plugins/tpm
+
+    - name: Install gitmux
+      homebrew: name=gitmux
+
+    - name: Source tmux conf
+      shell: tmux source ~/.tmux.conf
+
+    - name: Check if Intergast project exists
+      stat:
+        path: ~/Projects/work/intergast
+      register: intergast
+
+    - name: Clone Intergast Project
+      git:
+        repo: git@bitbucket.org:intergastonline/backend.git
+        dest: ~/Projects/work/intergast
+      when: not intergast.stat.exists
+
+    - name: Set Git config Intergast
+      git_config:
+        name: user.email
+        scope: local
+        repo: ~/Projects/work/intergast/
+        value: 's.trost@qubix.de'
+
+    - name: Install Fira Code Font
+      homebrew_cask: 
+        name: font-fira-code-nerd-font
+      tags: 
+        - font
+
+    - name: Install Docker
+      homebrew_cask: name=docker
+
+    - name: Install Spotify
+      homebrew_cask: name=spotify
+
+    - name: Install Teams
+      homebrew_cask: name=microsoft-teams
+
+    - name: Tap arl for gitmux
+      homebrew_tap: 
+        name: arl/arl
+
+    - name: Install go
+      homebrew: name=go
+
+    - name: Source .zshrc
+      shell: source ~/.zshrc
+      ignore_errors: true
+
