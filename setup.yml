@@ -43,7 +43,7 @@
 
     - name: Clone dotfiles
       git:
-        repo: https://github.com/stefantrost/.dotfiles.git
+        repo: git@github.com:stefantrost/.dotfiles.git
         dest: ~/.dotfiles
       when: not dots.stat.exists
 
