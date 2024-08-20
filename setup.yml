@@ -1,7 +1,33 @@
 - hosts: localhost
   tasks:
+    - name: Check for homebrew
+      stat: 
+        path: /opt/homebrew/bin/brew
+      register: brew_dir
+
+    - name: Install homebrew
+      shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      when: not brew_dir.stat.exists
+
+    - name: Install mas cli
+      homebrew: name=mas
+
     - name: Install Stow
       homebrew: name=stow
+
+    - name: Install volta
+      homebrew: name=volta
+
+    - name: Install AppStore apps 1Password, Clean My Mac, Magnet, XCode, HP Smart
+      mas: 
+        id:
+          - 441258766
+          - 1339170533
+          - 497799835
+          - 1474276998
+          - 1333542190
+        state: present
+        update_all: true
 
     - name: set default git config user name
       git_config:
@@ -33,8 +59,8 @@
     - name: Install ZSH Autosuggestions
       homebrew: name=zsh-autosuggestions
 
-    # - name: Symlink ZSH Autosuggestions
-    #   shell: ln -sF $(brew --prefix)/opt/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+    - name: Symlink ZSH Autosuggestions
+      shell: ln -sF $(brew --prefix)/opt/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
     - name: Check if dotfiles exist
       stat:
@@ -49,6 +75,9 @@
 
     - name: Install fzf
       homebrew: name=fzf
+
+    - name: Install Ripgrep
+      homebrew: name=ripgrep
 
     - name: Install/clone TPM
       git:
@@ -88,12 +117,30 @@
     - name: Install Docker
       homebrew_cask: name=docker
 
+    - name: Install Arc Browser
+      homebrew_cask: name=arc
+
+    - name: Install Chrome Browser
+      homebrew_cask: name=google-chrome
+
+    - name: Install Firefox Browser
+      homebrew_cask: name=firefox
+
     - name: Install Spotify
       homebrew_cask: name=spotify
 
     - name: Install Teams
       homebrew_cask: name=microsoft-teams
 
+    - name: Install OpenVPN Connect
+      homebrew_cask: name=openvpn-connect
+
+    - name: Install VLC
+      homebrew_cask: name=vlc
+
+    - name: Install Handbrake
+      homebrew_cask: name=handbrake
+      
     - name: Tap arl for gitmux
       homebrew_tap: 
         name: arl/arl
