@@ -7,27 +7,22 @@
 
     - name: Install homebrew
       shell: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      become: true
       when: not brew_dir.stat.exists
 
-    - name: Install mas cli
-      homebrew: name=mas
+    - name: Install iTerm
+      homebrew_cask: name=iterm2
+
+    - name: Install neovim
+      homebrew: name=neovim
+      tags:
+       - new
 
     - name: Install Stow
       homebrew: name=stow
 
     - name: Install volta
       homebrew: name=volta
-
-    - name: Install AppStore apps 1Password, Clean My Mac, Magnet, XCode, HP Smart
-      mas: 
-        id:
-          - 441258766
-          - 1339170533
-          - 497799835
-          - 1474276998
-          - 1333542190
-        state: present
-        update_all: true
 
     - name: set default git config user name
       git_config:
@@ -73,16 +68,30 @@
         dest: ~/.dotfiles
       when: not dots.stat.exists
 
+    - name: Run stow
+      shell: "stow . --target {{ ansible_env.HOME }}"
+      args:
+        chdir: ~/.dotfiles
+      register: result
+      changed_when: 'result.stderr is search("Link: ")'
+
     - name: Install fzf
       homebrew: name=fzf
 
     - name: Install Ripgrep
       homebrew: name=ripgrep
 
+    - name: Install tmux
+      homebrew: name=tmux
+
     - name: Install/clone TPM
       git:
         repo: https://github.com/tmux-plugins/tpm 
         dest: ~/.tmux/plugins/tpm
+
+    - name: Tap arl for gitmux
+      homebrew_tap: 
+        name: arl/arl
 
     - name: Install gitmux
       homebrew: name=gitmux
@@ -99,6 +108,7 @@
       git:
         repo: git@bitbucket.org:intergastonline/backend.git
         dest: ~/Projects/work/intergast
+        accept_hostkey: yes
       when: not intergast.stat.exists
 
     - name: Set Git config Intergast
@@ -141,14 +151,25 @@
     - name: Install Handbrake
       homebrew_cask: name=handbrake
       
-    - name: Tap arl for gitmux
-      homebrew_tap: 
-        name: arl/arl
-
     - name: Install go
       homebrew: name=go
 
     - name: Source .zshrc
       shell: source ~/.zshrc
       ignore_errors: true
+
+    - name: Install AppStore apps 1Password, Clean My Mac, Magnet, XCode, HP Smart
+      mas: 
+        id:
+          - 441258766
+          - 1339170533
+          - 497799835
+          - 1474276998
+          - 1333542190
+        state: present
+        upgrade_all: true
+
+    - name: Output next steps
+      shell: "echo 'Set Fira Code Nerd Font as iTerm font and press prefix+I in tmux to download plugins"
+
 
