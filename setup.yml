@@ -111,6 +111,18 @@
         accept_hostkey: yes
       when: not intergast.stat.exists
 
+    - name: Check if Epic Points project exists
+      stat:
+        path: ~/Projects/work/epic-points
+      register: epicpoints
+
+    - name: Clone Epic Points Project
+      git:
+        repo: git@github.com:techscene/epic-points.git
+        dest: ~/Projects/work/epic-points
+        accept_hostkey: yes
+      when: not epicpoints.stat.exists
+
     - name: Set Git config Intergast
       git_config:
         name: user.email
@@ -170,6 +182,6 @@
         upgrade_all: true
 
     - name: Output next steps
-      shell: "echo 'Set Fira Code Nerd Font as iTerm font and press prefix+I in tmux to download plugins"
+      shell: "echo 'Set Fira Code Nerd Font as iTerm font and press prefix+I in tmux to download plugins'"
 
 
